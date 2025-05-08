@@ -1,0 +1,28 @@
+# Archivos de entorno
+.env
+.env.*
+!.env.example
+
+# Bytecode compilado de Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Entornos virtuales
+venv/
+env/
+ENV/
+.venv/
+
+# IDE y editores
+.idea/
+.vscode/
+*.swp
+*.swo 

@@ -1,0 +1,17 @@
+# Sistema de Planificación de Comidas Semanal
+# Base de datos
+pymongo==4.5.0
+dnspython==2.4.2  # Para conexiones MongoDB Atlas
+python-dotenv==1.0.0
+
+# GUI
+tk==0.1.0  # Para Tkinter
+pillow==10.2.0  # Para manejo de imágenes en GUI
+tkcalendar==1.6.1  # Widget de calendario para selección de fechas
+
+# Utilidades
+python-dateutil==2.8.2  # Para manejo de fechas
+bcrypt==4.1.2  # Para hash de contraseñas
+validus==0.3.0  # Para validaciones
+pytz==2023.3.post1  # Para manejo de zonas horarias
+
