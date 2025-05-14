@@ -6,7 +6,7 @@ python-dotenv==1.0.0
 
 # GUI
 tk==0.1.0  # Para Tkinter
-pillow==10.2.0  # Para manejo de imágenes en GUI
+pillow==11.1.0  # Para manejo de imágenes en GUI
 tkcalendar==1.6.1  # Widget de calendario para selección de fechas
 
 # Utilidades
