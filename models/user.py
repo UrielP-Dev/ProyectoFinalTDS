@@ -1,6 +1,6 @@
 class User:
-    def __init__(self, username, password, fullname, email, role='user', user_id=None):
-        self.user_id = user_id
+    def __init__(self, username, password, fullname, email, role='user',_id=None):
+        self._id = _id
         self.username = username
         self.password = password  
         self.fullname = fullname
@@ -26,5 +26,5 @@ class User:
             fullname=data.get('fullname'),
             email=data.get('email'),
             role=data.get('role', 'user'),
-            user_id=user_id
+            _id=user_id
         ) 
