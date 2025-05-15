@@ -33,3 +33,6 @@ def get_db_connection():
     except Exception as e:
         print(f"Error al conectar a MongoDB Atlas: {e}")
         raise 
+    
+#Exportar bd
+db = get_db_connection()
