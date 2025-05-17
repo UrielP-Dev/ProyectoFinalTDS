@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from utils.styles import COLORS
 
 class WeeklyPlannerGUI:
     def __init__(self, root, user_data):
@@ -7,62 +8,177 @@ class WeeklyPlannerGUI:
         self.user_data = user_data
         
         self.root.title(f"NutriPlan - Planificador Semanal - Usuario: {user_data.username}")
-        self.root.geometry("1000x600")
+        self.root.geometry("1200x800")
         
-        self.main_frame = tk.Frame(self.root)
+        self.main_frame = tk.Frame(self.root, bg=COLORS['fondo'])
         self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
+        top_panel = tk.Frame(self.main_frame, bg=COLORS['fondo'])
+        top_panel.pack(fill=tk.X, pady=10)
+        
         welcome_label = tk.Label(
-            self.main_frame, 
+            top_panel, 
             text=f"Bienvenido(a) {user_data.fullname} al Planificador Semanal",
-            font=("Helvetica", 14, "bold")
+            font=("Helvetica", 14, "bold"),
+            bg=COLORS['fondo'],
+            fg=COLORS['texto_oscuro']
         )
-        welcome_label.pack(pady=20)
+        welcome_label.pack(side=tk.LEFT, padx=20)
+        
+        logout_button = tk.Button(
+            top_panel,
+            text="Cerrar Sesión",
+            command=self.logout,
+            bg=COLORS['rojo'],
+            fg=COLORS['texto_claro'],
+            padx=10
+        )
+        logout_button.pack(side=tk.RIGHT, padx=20)
+        
+        content_frame = tk.Frame(self.main_frame, bg=COLORS['fondo'])
+        content_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        left_panel = tk.Frame(content_frame, bg=COLORS['fondo'], width=250, padx=10, pady=10)
+        left_panel.pack(side=tk.LEFT, fill=tk.Y, padx=10)
+        left_panel.pack_propagate(False)
         
         tk.Label(
-            self.main_frame,
-            text="La interfaz del planificador semanal está en desarrollo...",
-            font=("Helvetica", 12)
-        ).pack(pady=10)
+            left_panel,
+            text="Funciones",
+            font=("Helvetica", 12, "bold"),
+            bg=COLORS['fondo'],
+            fg=COLORS['texto_oscuro']
+        ).pack(pady=(0, 10))
         
-        # Botón para cerrar sesión
-        logout_button = tk.Button(
-            self.main_frame,
-            text="Cerrar Sesión",
-            command=self.logout
+        self.create_function_button(left_panel, "Planificación Semanal", 
+                                   lambda: messagebox.showinfo("En desarrollo", "Módulo de Interfaz de Planificación Semanal en desarrollo."),
+                                   COLORS['verde'])
+                                   
+        self.create_function_button(left_panel, "Gestión de Recetas", 
+                                   lambda: messagebox.showinfo("En desarrollo", "Módulo de Gestión de Recetas en desarrollo."),
+                                   COLORS['naranja'])
+                                   
+        self.create_function_button(left_panel, "Búsqueda de Recetas", 
+                                   lambda: messagebox.showinfo("En desarrollo", "Módulo de Búsqueda y Selección de Recetas en desarrollo."),
+                                   COLORS['morado'])
+                                   
+        self.create_function_button(left_panel, "Lista de Compras", 
+                                   lambda: messagebox.showinfo("En desarrollo", "Módulo de Generación de Lista de Compras en desarrollo."),
+                                   COLORS['rojo'])
+        
+        right_panel = tk.Frame(content_frame, bg=COLORS['blanco'], padx=10, pady=10)
+        right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10)
+        
+        tk.Label(
+            right_panel,
+            text="Calendario Semanal de Comidas",
+            font=("Helvetica", 12, "bold"),
+            bg=COLORS['blanco'],
+            fg=COLORS['texto_oscuro']
+        ).pack(pady=(0, 10))
+        
+        self.create_weekly_calendar(right_panel)
+        
+    def create_function_button(self, parent, text, command, color):
+        """Crea un botón de función con estilo consistente"""
+        button = tk.Button(
+            parent,
+            text=text,
+            command=command,
+            bg=color,
+            fg=COLORS['texto_claro'],
+            width=25,
+            height=2,
+            font=("Helvetica", 10, "bold"),
+            relief=tk.RAISED,
+            borderwidth=2
         )
-        logout_button.pack(pady=20)
-
-        buttons_frame = tk.Frame(self.main_frame)
-        buttons_frame.pack(pady=30)
-
-        tk.Button(
-            buttons_frame,
-            text="Planificación Semanal (Uriel)",
-            width=30,
-            command=lambda: messagebox.showinfo("En desarrollo", "Módulo de Interfaz de Planificación Semanal en desarrollo.")
-        ).grid(row=0, column=0, padx=10, pady=5)
-
-        tk.Button(
-            buttons_frame,
-            text="Gestión de Recetas (Edgar)",
-            width=30,
-            command=lambda: messagebox.showinfo("En desarrollo", "Módulo de Gestión de Recetas en desarrollo.")
-        ).grid(row=0, column=1, padx=10, pady=5)
-
-        tk.Button(
-            buttons_frame,
-            text="Búsqueda y Selección de Recetas (Fer)",
-            width=30,
-            command=lambda: messagebox.showinfo("En desarrollo", "Módulo de Búsqueda y Selección de Recetas en desarrollo.")
-        ).grid(row=1, column=0, padx=10, pady=5)
-
-        tk.Button(
-            buttons_frame,
-            text="Generación de Lista de Compras (Sandra)",
-            width=30,
-            command=lambda: messagebox.showinfo("En desarrollo", "Módulo de Generación de Lista de Compras en desarrollo.")
-        ).grid(row=1, column=1, padx=10, pady=5)
+        button.pack(pady=8, fill=tk.X)
+        return button
+        
+    def create_weekly_calendar(self, parent):
+        """Crea la tabla del calendario semanal para la planificación de comidas"""
+        calendar_frame = tk.Frame(parent, bg=COLORS['blanco'])
+        calendar_frame.pack(fill=tk.BOTH, expand=True)
+        
+        dias = ["", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        
+        comidas = ["Desayuno", "Almuerzo", "Comida", "Merienda", "Cena"]
+        
+        for i, dia in enumerate(dias):
+            label = tk.Label(
+                calendar_frame, 
+                text=dia, 
+                font=("Helvetica", 10, "bold"),
+                bg=COLORS['verde'] if i > 0 else COLORS['blanco'],
+                fg=COLORS['texto_claro'] if i > 0 else COLORS['blanco'],
+                padx=10,
+                pady=5,
+                borderwidth=1,
+                relief=tk.RAISED if i > 0 else tk.FLAT,
+                width=12
+            )
+            label.grid(row=0, column=i, sticky="nsew")
+        
+        for i, comida in enumerate(comidas):
+            label = tk.Label(
+                calendar_frame, 
+                text=comida, 
+                font=("Helvetica", 10, "bold"),
+                bg=COLORS['morado'],
+                fg=COLORS['texto_claro'],
+                padx=5,
+                pady=10,
+                borderwidth=1,
+                relief=tk.RAISED
+            )
+            label.grid(row=i+1, column=0, sticky="nsew")
+            
+            for j in range(1, 8):
+                frame = tk.Frame(
+                    calendar_frame,
+                    bg=COLORS['blanco'],
+                    borderwidth=1,
+                    relief=tk.SUNKEN,
+                    height=80
+                )
+                frame.grid(row=i+1, column=j, sticky="nsew", padx=1, pady=1)
+                
+                frame.grid_propagate(False)
+                
+                add_button = tk.Button(
+                    frame,
+                    text="+",
+                    font=("Helvetica", 10),
+                    bg=COLORS['blanco'],
+                    command=lambda r=i+1, c=j: self.add_recipe(r, c)
+                )
+                add_button.pack(side=tk.BOTTOM, anchor="se", padx=2, pady=2)
+                
+                recipe_label = tk.Label(
+                    frame,
+                    text="",
+                    bg=COLORS['blanco'],
+                    wraplength=100,
+                    justify=tk.CENTER
+                )
+                recipe_label.pack(expand=True)
+        
+        for i in range(len(comidas) + 1):
+            calendar_frame.grid_rowconfigure(i, weight=1)
+        for i in range(len(dias)):
+            calendar_frame.grid_columnconfigure(i, weight=1)
+    
+    def add_recipe(self, row, col):
+        """Función que se activará al hacer clic para añadir receta"""
+        meal_types = ["Desayuno", "Almuerzo", "Comida", "Merienda", "Cena"]
+        days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        
+        messagebox.showinfo(
+            "Añadir Receta", 
+            f"Aquí podrás añadir una receta para el {days[col-1]} en {meal_types[row-1]}.\n\n"
+            "Función en desarrollo para seleccionar recetas."
+        )
 
     def logout(self):
         """Cierra la sesión y regresa a la pantalla de login"""
