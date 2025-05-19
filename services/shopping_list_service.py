@@ -1,36 +1,37 @@
-from pymongo import MongoClient
 from bson import ObjectId
-from models.recipe import Recipe
+from collections import defaultdict
+from repositories.mongo_connection import db
 
-class ShoppingListService:
-    def __init__(self):
-        self.client = MongoClient("mongodb://localhost:27017/")
-        self.db = self.client["nutriplan"]
-        self.users = self.db["users"]
-        self.recipes = self.db["recipes"]
-        self.weekly_plans = self.db["weekly_plans"]
+def generate_shopping_list(user_id):
+    try:
+        user_id = ObjectId(user_id)
+    except Exception:
+        return []
 
-    def get_ingredients_for_user(self, username):
-        user = self.users.find_one({"username": username})
-        if not user:
-            raise Exception("Usuario no encontrado.")
+    weekly_plan = db.weekly_plans.find_one({"user_id": user_id})
+    if not weekly_plan:
+        return []
 
-        plan = self.weekly_plans.find_one({"user_id": user["_id"]})
-        if not plan:
-            raise Exception("No hay planificación semanal para este usuario.")
+    recipe_ids = weekly_plan.get("recipes", [])
+    ingredient_totals = defaultdict(float)
 
-        recipe_ids = []
-        for day, meals in plan["days"].items():
-            for meal in ["desayuno", "almuerzo", "cena"]:
-                recipe_id = meals.get(meal)
-                if recipe_id:
-                    recipe_ids.append(recipe_id)
+    for recipe_id in recipe_ids:
+        recipe = db.recipes.find_one({"_id": ObjectId(recipe_id)})
+        if not recipe:
+            continue
 
-        ingredients = set()
-        for r_id in recipe_ids:
-            recipe_data = self.recipes.find_one({"_id": ObjectId(r_id)})
-            if recipe_data:
-                recipe = Recipe.from_dict(recipe_data)
-                ingredients.update(recipe.ingredients)
+        for ing in recipe.get("ingredients", []):
+            name = ing.get("name", "").strip().lower()
+            unit = ing.get("unit", "").strip().lower()
+            qty = ing.get("quantity", 0)
 
-        return list(ingredients)
+            if name:  # aseguramos que hay nombre
+                key = (name, unit)
+                ingredient_totals[key] += qty
+
+    shopping_list = [
+        {"name": name.capitalize(), "quantity": quantity, "unit": unit}
+        for (name, unit), quantity in ingredient_totals.items()
+    ]
+
+    return shopping_list

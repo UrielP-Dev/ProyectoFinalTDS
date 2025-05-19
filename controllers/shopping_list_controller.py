@@ -1,13 +1,11 @@
-# controllers/shopping_list_controller.py
+from services.shopping_list_service import ShoppingListService
 
 class ShoppingListController:
     def __init__(self):
-        pass
+        self.service = ShoppingListService()
 
-    def generar_lista_compras(self, seleccion_usuario):
-        # Esto es un mock: genera una lista de prueba
-        if seleccion_usuario.strip() == "":
-            raise ValueError("Debes ingresar una semana o criterio válido.")
-        
-        # Simula ingredientes recolectados de recetas
-        return ["pollo", "arroz", "cebolla", "tomate"]
+    def get_user_info(self, user_id):
+        return self.service.get_user_info(user_id)
+
+    def generate_shopping_list(self, user_id):
+        return self.service.generate_shopping_list(user_id)
