@@ -1,10 +1,21 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+# Implementación prueba Sandy
+from ui.shopping_list_gui import ShoppingListGUI
 
 class WeeklyPlannerGUI:
+    
+    # Implementación prueba Sandy
+    def open_shopping_list(self):
+        """Abre la ventana de lista de compras"""
+        shopping_root = tk.Toplevel(self.root)
+        ShoppingListGUI(shopping_root, self.user_data)
+    
+    
     def __init__(self, root, user_data):
         self.root = root
         self.user_data = user_data
+        
         
         self.root.title(f"NutriPlan - Planificador Semanal - Usuario: {user_data.username}")
         self.root.geometry("1000x600")
@@ -56,13 +67,22 @@ class WeeklyPlannerGUI:
             width=30,
             command=lambda: messagebox.showinfo("En desarrollo", "Módulo de Búsqueda y Selección de Recetas en desarrollo.")
         ).grid(row=1, column=0, padx=10, pady=5)
-
+        
+        """ IMPLEMENTACIÓN SANDY
         tk.Button(
             buttons_frame,
             text="Generación de Lista de Compras (Sandra)",
             width=30,
             command=lambda: messagebox.showinfo("En desarrollo", "Módulo de Generación de Lista de Compras en desarrollo.")
         ).grid(row=1, column=1, padx=10, pady=5)
+        """
+        tk.Button(
+            buttons_frame,
+            text="Generación de Lista de Compras (Sandra)",
+            width=30,
+            command=self.open_shopping_list
+        ).grid(row=1, column=1, padx=10, pady=5)
+
 
     def logout(self):
         """Cierra la sesión y regresa a la pantalla de login"""
