@@ -1,4 +1,5 @@
 class Recipe:
+
     def __init__(self, name, description, ingredients, steps, recipe_id = None):
         """_summary_
 
