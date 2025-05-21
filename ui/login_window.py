@@ -19,7 +19,7 @@ class LoginWindow:
     def setup_window(self):
         """Configura las propiedades generales de la ventana"""
         self.root.title("NutriPlan - Sistema de Planificación de Comidas")
-        self.root.geometry("800x500")
+        self.root.geometry("1920x1080")
         self.root.resizable(False, False)
         self.root.config(bg=COLORS['fondo'])
         
