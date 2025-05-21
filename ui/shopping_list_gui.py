@@ -2,12 +2,17 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from services.shopping_list_service import generate_shopping_list
 import csv
+import utils.session as session
 
 class ShoppingListGUI:
     def __init__(self, root, user_data):
         self.root = root
         self.user_data = user_data
-        self.items = []  # ← Aquí almacenaremos los ingredientes para exportar
+        self.items = [] 
+
+        print(f"ID de usuario en shopping_list_gui: {user_data._id}, tipo: {type(user_data._id)}")
+        
+        session.user_id = str(user_data._id)  
 
         self.root.title(f"Lista de Compras - {user_data.fullname}")
         self.root.geometry("900x600")
@@ -66,8 +71,13 @@ class ShoppingListGUI:
             for item in self.tree.get_children():
                 self.tree.delete(item)
 
+            # Volver a verificar el ID actual
+            print(f"ID de sesión al generar lista: {session.user_id}")
+            
             # 🔧 Usa datos reales o simulados
-            self.items = generate_shopping_list(str(self.user_data._id))
+            self.items = generate_shopping_list(session.user_id)
+            print(f"Usuario: {self.user_data}")
+            print(f"Elementos obtenidos: {self.items}")  # Para depuración
 
             if not self.items:
                 messagebox.showinfo("Sin recetas", "Aún no tienes recetas en tu planificación semanal.")

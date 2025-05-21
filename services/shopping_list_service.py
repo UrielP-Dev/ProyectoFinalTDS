@@ -3,15 +3,23 @@ from collections import defaultdict
 from repositories.mongo_connection import db
 
 def generate_shopping_list(user_id):
+    print(f"ID recibido en shopping_list_service: {user_id}")
     try:
-        user_id = ObjectId(user_id)
-    except Exception:
+        user_id_obj = ObjectId(user_id)
+        print(f"ID convertido a ObjectId: {user_id_obj}")
+    except Exception as e:
+        print(f"Error al convertir ID: {e}")
         return []
 
-    weekly_plan = db.weekly_plans.find_one({"user_id": user_id})
+    weekly_plan = db.weekly_plans.find_one({"user_id": user_id_obj})
+    
     if not weekly_plan:
+        print(f"No se encontró ningún plan semanal para el usuario")
+        all_plans = list(db.weekly_plans.find())
+        print(f"Planes disponibles: {all_plans}")
         return []
-
+    
+    print(f"Plan semanal encontrado: {weekly_plan}")
     recipe_ids = weekly_plan.get("recipes", [])
     ingredient_totals = defaultdict(float)
 
