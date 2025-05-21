@@ -7,7 +7,7 @@ from utils.styles import COLORS
 class SearchGUI:
     def __init__(self, root, on_select_callback):
         self.root = root
-        self.on_select_callback = on_select_callback  # Callback para el módulo de planificación
+        self.on_select_callback = on_select_callback
         self.setup_window()
         self.create_search_widgets()
 
@@ -40,7 +40,7 @@ class SearchGUI:
         tk.Label(self.main_frame, text="Búsqueda de Recetas", font=self.subtitle_font, 
                  bg=COLORS['fondo'], fg=COLORS['texto_oscuro']).pack(pady=(0, 20))
 
-        # Marco central para el contenido (similar a login_frame en LoginWindow)
+        # Marco central para el contenido
         search_frame = tk.Frame(self.main_frame, bg=COLORS['blanco'], padx=30, pady=30, 
                                 relief=tk.RIDGE, bd=1)
         search_frame.pack(fill=tk.BOTH, expand=True, padx=50)
@@ -56,7 +56,7 @@ class SearchGUI:
         self.entry_busqueda.bind("<KeyRelease>", self.on_search)
 
         # Lista de recetas
-        self.listbox_recetas = tk.Listbox(search_frame, height=10, selectmode=tk.SINGLE, 
+        self.listbox_recetas = tk.Listbox(search_frame, height=10, 
                                           font=self.normal_font)
         self.listbox_recetas.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
 
@@ -67,7 +67,7 @@ class SearchGUI:
                                   relief=tk.FLAT, padx=20, pady=8, command=self.select_recipe)
         select_button.pack()
 
-        # Lista para almacenar recetas (necesaria para mapear selección)
+        # Lista para almacenar recetas
         self.recipes = []
 
     def set_controller(self, controller: SearchController):
@@ -90,13 +90,12 @@ class SearchGUI:
         if selection:
             index = selection[0]
             recipe = self.recipes[index]
-            self.on_select_callback(recipe)  # Llamar al callback con la receta seleccionada
-            self.root.destroy()  # Cerrar ventana
+            self.on_select_callback(recipe)
+            self.root.destroy()
         else:
             self.show_error("Por favor, selecciona una receta")
 
     def show_error(self, message):
-        """Muestra un mensaje de error"""
         messagebox.showerror("Error", message)
 
     def on_recipe_selected(self, recipe):
