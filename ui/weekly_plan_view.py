@@ -13,7 +13,8 @@ class WeeklyPlanView:
         
         self.setup_window()
         self.create_widgets()
-        
+        print("WeeklyPlanView initialized")
+
         # Inicializar el controlador
         from controllers.weekly_plan_controller import WeeklyPlanController
         self.controller = WeeklyPlanController(self, user_data)

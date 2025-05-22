@@ -53,32 +53,29 @@ class WeeklyPlanRepository:
     
     def add_recipe_to_plan(self, user_id, recipe_id, week="current"):
         """Añade una receta al plan semanal. Si no existe el plan, lo crea"""
-        # Buscar si ya existe un plan para este usuario y semana
         plan = self.get_by_user(user_id, week)
-        
         if plan:
-            # Si ya existe el plan, añadir la receta si no está ya
-            if recipe_id not in plan.recipes:
-                plan.recipes.append(recipe_id)
-                return self.save(plan)
-            return plan
+            # Si ya existe el plan, suma 1 al conteo de la receta
+            plan.recipes[recipe_id] = plan.recipes.get(recipe_id, 0) + 1
+            return self.save(plan)
         else:
-            # Si no existe, crear un nuevo plan con esta receta
+            # Si no existe, crear un nuevo plan con esta receta (conteo 1)
             new_plan = WeeklyPlan(
                 user_id=user_id,
-                recipes=[recipe_id],
+                recipes={recipe_id: 1},
                 week=week
             )
             return self.save(new_plan)
-    
+
     def remove_recipe_from_plan(self, user_id, recipe_id, week="current"):
-        """Elimina una receta del plan semanal"""
+        """Elimina una receta del plan semanal (resta 1 al conteo o elimina si llega a 0)"""
         plan = self.get_by_user(user_id, week)
-        
         if plan and recipe_id in plan.recipes:
-            plan.recipes.remove(recipe_id)
+            if plan.recipes[recipe_id] > 1:
+                plan.recipes[recipe_id] -= 1
+            else:
+                del plan.recipes[recipe_id]
             return self.save(plan)
-        
         return None
     
     def delete(self, plan_id):
@@ -94,4 +91,4 @@ class WeeklyPlanRepository:
         
         result = self.collection.delete_one(query)
         
-        return result.deleted_count > 0 
+        return result.deleted_count > 0

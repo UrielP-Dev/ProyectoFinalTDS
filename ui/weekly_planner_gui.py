@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+import threading
 from utils.styles import COLORS
 from ui.shopping_list_gui import ShoppingListGUI
 from ui.recipe_gui import RecipeGUI
@@ -11,6 +12,7 @@ class WeeklyPlannerGUI:
         self.user_data = user_data
         self.selected_recipe = None
         self.meal_cells = {}  # Diccionario para almacenar referencias a las celdas del calendario
+        self._loading = False  # Flag para evitar múltiples cargas simultáneas
 
         self.root.title(f"NutriPlan - Planificador Semanal - Usuario: {user_data.username}")
         self.root.geometry("1200x800")
@@ -30,16 +32,16 @@ class WeeklyPlannerGUI:
         )
         welcome_label.pack(side=tk.LEFT, padx=20)
 
-        # Botón para recargar el calendario
-        reload_button = tk.Button(
+        # Botón para recargar el calendario con indicador de carga
+        self.reload_button = tk.Button(
             top_panel,
             text="Recargar Planes",
-            command=self.update_calendar,
+            command=self.update_calendar_async,
             bg=COLORS['azul'],
             fg=COLORS['texto_claro'],
             padx=10
         )
-        reload_button.pack(side=tk.RIGHT, padx=(0, 20))
+        self.reload_button.pack(side=tk.RIGHT, padx=(0, 20))
 
         logout_button = tk.Button(
             top_panel,
@@ -85,17 +87,32 @@ class WeeklyPlannerGUI:
         right_panel = tk.Frame(content_frame, bg=COLORS['blanco'], padx=10, pady=10)
         right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10)
 
-        tk.Label(
-            right_panel,
+        # Título del calendario con indicador de carga
+        title_frame = tk.Frame(right_panel, bg=COLORS['blanco'])
+        title_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        self.calendar_title = tk.Label(
+            title_frame,
             text="Calendario Semanal de Comidas",
             font=("Helvetica", 12, "bold"),
             bg=COLORS['blanco'],
             fg=COLORS['texto_oscuro']
-        ).pack(pady=(0, 10))
+        )
+        self.calendar_title.pack(side=tk.LEFT)
+        
+        # Indicador de carga
+        self.loading_label = tk.Label(
+            title_frame,
+            text="",
+            font=("Helvetica", 10),
+            bg=COLORS['blanco'],
+            fg=COLORS['azul']
+        )
+        self.loading_label.pack(side=tk.RIGHT)
 
         self.create_weekly_calendar(right_panel)
-        # Cargar planes de comida existentes
-        self.update_calendar()
+        # Cargar planes de comida existentes de forma asíncrona
+        self.update_calendar_async()
 
     def create_function_button(self, parent, text, command, color):
         button = tk.Button(
@@ -188,6 +205,7 @@ class WeeklyPlannerGUI:
             calendar_frame.grid_columnconfigure(i, weight=1)
 
     def add_recipe(self, row, col):
+        """Abre la ventana de planificación de comidas de forma optimizada"""
         from ui.meal_plan_gui import MealPlanGUI
         
         meal_types = ["Desayuno", "Almuerzo", "Comida", "Merienda", "Cena"]
@@ -200,9 +218,11 @@ class WeeklyPlannerGUI:
         meal_plan_root = tk.Toplevel(self.root)
         meal_plan_gui = MealPlanGUI(meal_plan_root, self.user_data, day, meal_type)
         
-        # Actualizar la interfaz después de cerrar la ventana
-        self.root.wait_window(meal_plan_root)
-        self.update_calendar()
+        # Callback para actualizar el calendario cuando se cierre la ventana
+        def on_window_close():
+            self.update_calendar_async()
+        
+        meal_plan_root.protocol("WM_DELETE_WINDOW", lambda: [meal_plan_root.destroy(), on_window_close()])
 
     def open_shopping_list(self):
         shopping_root = tk.Toplevel(self.root)
@@ -227,30 +247,39 @@ class WeeklyPlannerGUI:
         self.selected_recipe = recipe
         messagebox.showinfo("Receta Seleccionada", f"Receta '{recipe}' seleccionada. Ahora puedes añadirla a una comida del planificador.")
     
-    def update_calendar(self):
-        """Actualiza el calendario con las comidas guardadas en la base de datos"""
-        from services.meal_plan_service import MealPlanService
-        from services.recipe_service import RecipeService
+    def update_calendar_async(self):
+        """Actualiza el calendario de forma asíncrona para no bloquear la UI"""
+        if self._loading:
+            return  # Evitar múltiples cargas simultáneas
         
-        meal_plan_service = MealPlanService()
-        recipe_service = RecipeService()
-        meal_plans = meal_plan_service.get_meal_plans_by_user(self.user_data._id)
+        self._loading = True
+        self.show_loading(True)
         
-        # Limpiar todas las celdas
-        for label in self.meal_cells.values():
-            label.config(text="", bg=COLORS['blanco'])
-        
-        # Actualizar celdas con las comidas planificadas
-        meal_types = ["Desayuno", "Almuerzo", "Comida", "Merienda", "Cena"]
-        days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-        
-        for meal_plan in meal_plans:
-            try:
-                day_index = days.index(meal_plan.day)
-                meal_type_index = meal_types.index(meal_plan.meal_type)
-                cell_key = (meal_type_index, day_index)
-                
-                if cell_key in self.meal_cells:
+        # Ejecutar la carga en un hilo separado
+        thread = threading.Thread(target=self._load_calendar_data, daemon=True)
+        thread.start()
+    
+    def _load_calendar_data(self):
+        """Carga los datos del calendario en un hilo separado"""
+        try:
+            from services.meal_plan_service import MealPlanService
+            from services.recipe_service import RecipeService
+            
+            meal_plan_service = MealPlanService()
+            recipe_service = RecipeService()
+            meal_plans = meal_plan_service.get_meal_plans_by_user(self.user_data._id)
+            
+            # Procesar los datos de los planes de comida
+            processed_data = {}
+            meal_types = ["Desayuno", "Almuerzo", "Comida", "Merienda", "Cena"]
+            days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+            
+            for meal_plan in meal_plans:
+                try:
+                    day_index = days.index(meal_plan.day)
+                    meal_type_index = meal_types.index(meal_plan.meal_type)
+                    cell_key = (meal_type_index, day_index)
+                    
                     # Obtener la receta de meal_plan
                     recipe = None
                     if meal_plan.recipe:
@@ -260,17 +289,56 @@ class WeeklyPlannerGUI:
                         recipe = recipe_service.get_recipe_by_id(meal_plan.recipe_id)
                     
                     if recipe and hasattr(recipe, 'name'):
-                        self.meal_cells[cell_key].config(
-                            text=recipe.name,
-                            bg=COLORS['verde_claro']
-                        )
+                        processed_data[cell_key] = {
+                            'text': recipe.name,
+                            'bg': COLORS['verde_claro']
+                        }
                     else:
-                        self.meal_cells[cell_key].config(
-                            text="Sin nombre",
-                            bg=COLORS['gris_claro']
-                        )
-            except (ValueError, IndexError, AttributeError) as e:
-                print(f"Error al actualizar celda: {e}")
+                        processed_data[cell_key] = {
+                            'text': "Sin nombre",
+                            'bg': COLORS['gris_claro']
+                        }
+                        
+                except (ValueError, IndexError, AttributeError) as e:
+                    print(f"Error al procesar plan de comida: {e}")
+            
+            # Actualizar la UI en el hilo principal
+            self.root.after(0, lambda: self._update_calendar_ui(processed_data))
+            
+        except Exception as e:
+            print(f"Error al cargar datos del calendario: {e}")
+            self.root.after(0, lambda: self.show_loading(False))
+    
+    def _update_calendar_ui(self, processed_data):
+        """Actualiza la UI del calendario con los datos procesados"""
+        try:
+            # Limpiar todas las celdas
+            for label in self.meal_cells.values():
+                label.config(text="", bg=COLORS['blanco'])
+            
+            # Actualizar celdas con los datos procesados
+            for cell_key, data in processed_data.items():
+                if cell_key in self.meal_cells:
+                    self.meal_cells[cell_key].config(
+                        text=data['text'],
+                        bg=data['bg']
+                    )
+        
+        except Exception as e:
+            print(f"Error al actualizar UI del calendario: {e}")
+        
+        finally:
+            self.show_loading(False)
+            self._loading = False
+    
+    def show_loading(self, loading):
+        """Muestra u oculta el indicador de carga"""
+        if loading:
+            self.loading_label.config(text="Cargando...")
+            self.reload_button.config(state='disabled', text="Cargando...")
+        else:
+            self.loading_label.config(text="")
+            self.reload_button.config(state='normal', text="Recargar Planes")
 
     def logout(self):
         if messagebox.askyesno("Cerrar Sesión", "¿Estás seguro que deseas cerrar sesión?"):
