@@ -19,6 +19,44 @@ class RecipeRepository:
         result = self.collection.insert_one(recipe_dict)
         recipe.recipe_id = str(result.inserted_id)
         return recipe
+    
+    def find_by_id(self, recipe_id):
+        """Busca una receta por su ID
+
+        Args:
+            recipe_id (str): ID de la receta a buscar
+        """
+        try:
+            if isinstance(recipe_id, str):
+                try:
+                    # Intentar primero con ObjectId
+                    recipe_data = self.collection.find_one({'_id': ObjectId(recipe_id)})
+                    if recipe_data:
+                        return Recipe.from_dict(recipe_data, str(recipe_data['_id']))
+                except:
+                    # Si falla, intentar con recipe_id como string
+                    recipe_data = self.collection.find_one({'recipe_id': recipe_id})
+            else:
+                recipe_data = self.collection.find_one({'recipe_id': recipe_id})
+                
+            if recipe_data:
+                return Recipe.from_dict(recipe_data, str(recipe_data['_id']))
+            
+            # Si todo lo anterior falla, intentar una búsqueda por cualquier campo que contenga el id
+            print(f"Buscando receta con id: {recipe_id}")
+            recipe_data = self.collection.find_one({'$or': [
+                {'_id': recipe_id},
+                {'recipe_id': recipe_id},
+                {'id': recipe_id}
+            ]})
+            
+            if recipe_data:
+                return Recipe.from_dict(recipe_data, str(recipe_data['_id']))
+                
+            return None
+        except Exception as e:
+            print(f"Error al buscar receta por ID: {str(e)}")
+            return None
          
     def find_by_name(self, name):
         """_summary_
