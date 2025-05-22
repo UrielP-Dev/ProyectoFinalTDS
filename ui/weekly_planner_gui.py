@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 # Implementación prueba Sandy
 from ui.shopping_list_gui import ShoppingListGUI
+from ui.recipe_gui import RecipeGUI
 
 
 class WeeklyPlannerGUI:
@@ -99,4 +100,9 @@ class WeeklyPlannerGUI:
         """Cierra la sesión y regresa a la pantalla de login"""
         if messagebox.askyesno("Cerrar Sesión", "¿Estás seguro que deseas cerrar sesión?"):
             self.root.destroy()
+    
+    def open_recipe_gui(self):
+        """Abre la ventana de gestión de recetas"""
+        recipe_root = tk.Toplevel(self.root)
+        RecipeGUI(recipe_root, self.user_data)
 
