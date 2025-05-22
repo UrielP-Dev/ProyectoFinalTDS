@@ -1,7 +1,10 @@
 import tkinter as tk
+
 from tkinter import ttk, messagebox
 # Implementación prueba Sandy
 from ui.shopping_list_gui import ShoppingListGUI
+from ui.recipe_gui import RecipeGUI
+
 
 class WeeklyPlannerGUI:
     
@@ -35,7 +38,15 @@ class WeeklyPlannerGUI:
             text="La interfaz del planificador semanal está en desarrollo...",
             font=("Helvetica", 12)
         ).pack(pady=10)
-        
+
+        # Botón para ir a la sección de recetas
+        recipe_button = tk.Button(
+            self.main_frame,
+            text="Ir a Recetas",
+            command=lambda: self.open_recipe_gui()  # Aquí se debería abrir la ventana de recetas
+        )
+        recipe_button.pack(pady=20)
+
         # Botón para cerrar sesión
         logout_button = tk.Button(
             self.main_frame,
@@ -43,6 +54,7 @@ class WeeklyPlannerGUI:
             command=self.logout
         )
         logout_button.pack(pady=20)
+
 
         buttons_frame = tk.Frame(self.main_frame)
         buttons_frame.pack(pady=30)
@@ -88,3 +100,9 @@ class WeeklyPlannerGUI:
         """Cierra la sesión y regresa a la pantalla de login"""
         if messagebox.askyesno("Cerrar Sesión", "¿Estás seguro que deseas cerrar sesión?"):
             self.root.destroy()
+    
+    def open_recipe_gui(self):
+        """Abre la ventana de gestión de recetas"""
+        recipe_root = tk.Toplevel(self.root)
+        RecipeGUI(recipe_root, self.user_data)
+
