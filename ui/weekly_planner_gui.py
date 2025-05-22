@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 from utils.styles import COLORS
 from ui.shopping_list_gui import ShoppingListGUI
+from ui.recipe_gui import RecipeGUI
+
 
 class WeeklyPlannerGUI:
     def __init__(self, root, user_data):
@@ -56,14 +58,13 @@ class WeeklyPlannerGUI:
                                     COLORS['verde'])
 
         self.create_function_button(left_panel, "Gestión de Recetas",
-                                    lambda: messagebox.showinfo("En desarrollo", "Módulo de Gestión de Recetas en desarrollo."),
+                                    self.open_recipe_gui,
                                     COLORS['naranja'])
 
         self.create_function_button(left_panel, "Búsqueda de Recetas",
                                     lambda: messagebox.showinfo("En desarrollo", "Módulo de Búsqueda y Selección de Recetas en desarrollo."),
                                     COLORS['morado'])
 
-        # ✅ Lista de Compras que abre una nueva ventana
         self.create_function_button(left_panel, "Lista de Compras",
                                     self.open_shopping_list,
                                     COLORS['rojo'])
@@ -178,9 +179,12 @@ class WeeklyPlannerGUI:
         )
 
     def open_shopping_list(self):
-        """Abre la ventana de lista de compras"""
         shopping_root = tk.Toplevel(self.root)
         ShoppingListGUI(shopping_root, self.user_data)
+
+    def open_recipe_gui(self):
+        recipe_root = tk.Toplevel(self.root)
+        RecipeGUI(recipe_root, self.user_data)
 
     def logout(self):
         if messagebox.askyesno("Cerrar Sesión", "¿Estás seguro que deseas cerrar sesión?"):
