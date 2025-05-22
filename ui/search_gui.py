@@ -9,6 +9,7 @@ class SearchGUI:
         self.root = root
         self.on_select_callback = on_select_callback
         self.setup_window()
+        self.controller = None  # Inicializamos como None
         self.create_search_widgets()
 
     def setup_window(self):
@@ -18,12 +19,12 @@ class SearchGUI:
         self.root.resizable(False, False)
         self.root.config(bg=COLORS['fondo'])
 
-        # Configura fuentes (igual que en LoginWindow)
+        # Configura fuentes
         self.title_font = font.Font(family="Helvetica", size=22, weight="bold")
         self.subtitle_font = font.Font(family="Helvetica", size=12, weight="bold")
         self.normal_font = font.Font(family="Helvetica", size=10)
 
-        # Frame principal que contendrá la vista
+        # Frame principal
         self.main_frame = tk.Frame(self.root, bg=COLORS['fondo'], padx=20, pady=20)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -40,7 +41,7 @@ class SearchGUI:
         tk.Label(self.main_frame, text="Búsqueda de Recetas", font=self.subtitle_font, 
                  bg=COLORS['fondo'], fg=COLORS['texto_oscuro']).pack(pady=(0, 20))
 
-        # Marco central para el contenido
+        # Marco central
         search_frame = tk.Frame(self.main_frame, bg=COLORS['blanco'], padx=30, pady=30, 
                                 relief=tk.RIDGE, bd=1)
         search_frame.pack(fill=tk.BOTH, expand=True, padx=50)
@@ -71,7 +72,7 @@ class SearchGUI:
         self.recipes = []
 
     def set_controller(self, controller: SearchController):
-        self.controller = controller
+        self.controller = controller  # Asignamos el controller aquí
         # Cargar todas las recetas al inicio
         self.controller.search_recipes("")
 
@@ -82,12 +83,13 @@ class SearchGUI:
             self.listbox_recetas.insert(tk.END, str(recipe))
 
     def on_search(self, event):
-        query = self.entry_busqueda.get()
-        self.controller.search_recipes(query)
+        if self.controller:  # Verificamos que el controller esté inicializado
+            query = self.entry_busqueda.get()
+            self.controller.search_recipes(query)
 
     def select_recipe(self):
         selection = self.listbox_recetas.curselection()
-        if selection:
+        if selection and self.controller:
             index = selection[0]
             recipe = self.recipes[index]
             self.on_select_callback(recipe)

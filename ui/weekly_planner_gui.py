@@ -1,5 +1,10 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from ui.search_gui import SearchGUI
+from controllers.search_controller import SearchController
+from services.search_service import SearchService
+from repositories.recipe_repository import RecipeRepository
+
 
 class WeeklyPlannerGUI:
     def __init__(self, root, user_data):
@@ -25,7 +30,7 @@ class WeeklyPlannerGUI:
             font=("Helvetica", 12)
         ).pack(pady=10)
         
-        # Botón para cerrar sesión
+        
         logout_button = tk.Button(
             self.main_frame,
             text="Cerrar Sesión",
@@ -54,7 +59,7 @@ class WeeklyPlannerGUI:
             buttons_frame,
             text="Búsqueda y Selección de Recetas (Fer)",
             width=30,
-            command=lambda: messagebox.showinfo("En desarrollo", "Módulo de Búsqueda y Selección de Recetas en desarrollo.")
+            command=self.open_search_window
         ).grid(row=1, column=0, padx=10, pady=5)
 
         tk.Button(
@@ -63,6 +68,17 @@ class WeeklyPlannerGUI:
             width=30,
             command=lambda: messagebox.showinfo("En desarrollo", "Módulo de Generación de Lista de Compras en desarrollo.")
         ).grid(row=1, column=1, padx=10, pady=5)
+    
+    def open_search_window(self):
+        """Abre la ventana de búsqueda y selección de recetas"""
+        search_window = tk.Toplevel(self.root)
+        search_gui = SearchGUI(search_window, self.on_recipe_selected)
+        search_controller = SearchController(self.search_service, search_gui)
+        search_gui.set_controller(search_controller)
+
+    def on_recipe_selected(self, recipe):
+        """Callback que se ejecuta cuando se selecciona una receta"""
+        messagebox.showinfo("Receta Seleccionada", f"Has seleccionado: {recipe}")
 
     def logout(self):
         """Cierra la sesión y regresa a la pantalla de login"""
