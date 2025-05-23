@@ -406,18 +406,26 @@ class RecipeGUI:
         self.btn_agregar.config(state="normal")
     
     def limpiar_formulario(self):
-        """Limpia todos los campos del formulario"""
+        """Limpia todos los campos del formulario y los pone en modo edición"""
+        self.entry_nombre.config(state="normal")
         self.entry_nombre.delete(0, tk.END)
+        self.entry_descripcion.config(state="normal")
         self.entry_descripcion.delete("1.0", tk.END)
         self.entry_ingrediente.delete(0, tk.END)
         self.entry_cantidad.delete(0, tk.END)
         self.entry_cantidad.insert(0, "0")
         self.combo_unidad.set("pz")
+        self.listbox_ingredientes.config(state="normal")
         self.listbox_ingredientes.delete(0, tk.END)
+        self.entry_instrucciones.config(state="normal")
         self.entry_instrucciones.delete("1.0", tk.END)
         self.ingredientes = []
         self.btn_agregar.config(state="disabled")
-        
+        self.btn_agregar_ingrediente.config(state="normal")
+        self.btn_eliminar_ingrediente.config(state="normal")
+        self.btn_guardar.config(state="normal")
+        self.btn_limpiar.config(state="normal")
+    
     def eliminar_receta(self):
         """Elimina la receta"""
         seleccion = self.tree.selection()
@@ -434,7 +442,8 @@ class RecipeGUI:
             self.tree.delete(seleccion[0])
             del self.recetas[idx]
             self.limpiar_formulario()
-        
+            self.editing_recipe_id = None
+    
     def show_error(self, message):
         messagebox.showerror("Error", message)
         
