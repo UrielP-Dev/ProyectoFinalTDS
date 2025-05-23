@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: nutriplan-app
+    networks:
+      - app-network
+    environment:
+      - MONGO_URI=mongodb://mongo_user:mongopassword@mongo:27017/nutriplan?authSource=admin
+      - DB_NAME=nutriplan
+    depends_on:
+      - mongo
+    ports:
+      - "5000:5000"  
+
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    networks:
+      - app-network
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo_user
+      - MONGO_INITDB_ROOT_PASSWORD=mongopassword
+    volumes:
+      - ./mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+networks:
+  app-network:
+    driver: bridge
