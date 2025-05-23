@@ -3,8 +3,6 @@ from tkinter import ttk, messagebox
 import sys
 from controllers.recipe_controller import RecipeController
 from utils.styles import COLORS
-import select
-from pip._vendor.rich.jupyter import display
 
 
 class RecipeGUI:
@@ -87,27 +85,31 @@ class RecipeGUI:
                 font=("Arial", 8, "bold")).grid(row=row, column=0, sticky="w", pady=(0, 3))
         row += 1
 
-        # Frame compacto para ingredientes en una sola fila
+        # Frame de ingredientes
         ing_frame = tk.Frame(form_frame, bg=BG_COLOR)
         ing_frame.grid(row=row, column=0, sticky="ew", pady=(0, 3))
         ing_frame.columnconfigure(0, weight=2)  # Nombre más ancho
         ing_frame.columnconfigure(1, weight=1)  # Cantidad
         ing_frame.columnconfigure(2, weight=1)  # Unidad
-        row += 1
         
+        #Labels correspondientes a los ingredientes
+        tk.Label(ing_frame, text="Nombre", bg=BG_COLOR, fg=TEXT_COLOR, font=("Arial", 7, "bold"), justify="left").grid(row=0, column=0, sticky="w", padx=(0, 0))
+        tk.Label(ing_frame, text="Cantidad", bg=BG_COLOR, fg=TEXT_COLOR, font=("Arial", 7, "bold"), justify="left").grid(row=0, column=1, sticky="w", padx=(0, 0))
+        tk.Label(ing_frame, text="Unidad", bg=BG_COLOR, fg=TEXT_COLOR, font=("Arial", 7, "bold")).grid(row=0, column=2, sticky="w", padx=(0, 0))
+        
+        # Entradas de datos de los ingredientes
         self.entry_ingrediente = tk.Entry(ing_frame, bg=COLORS['blanco'], fg=TEXT_COLOR, 
-                                        relief=tk.FLAT, highlightbackground=BORDER_COLOR, font=("Arial", 8))
-        self.entry_ingrediente.grid(row=0, column=0, sticky="ew", padx=(0, 2))
-        
+                        relief=tk.FLAT, highlightbackground=BORDER_COLOR, font=("Arial", 8))
+        self.entry_ingrediente.grid(row=1, column=0, sticky="ew", padx=(0, 2))
         self.entry_cantidad = tk.Entry(ing_frame, bg=COLORS['blanco'], fg=TEXT_COLOR, 
-                                     relief=tk.FLAT, highlightbackground=BORDER_COLOR, font=("Arial", 8))
+                         relief=tk.FLAT, highlightbackground=BORDER_COLOR, font=("Arial", 8))
         self.entry_cantidad.insert(0, "0")
-        self.entry_cantidad.grid(row=0, column=1, sticky="ew", padx=2)
-
+        self.entry_cantidad.grid(row=1, column=1, sticky="ew", padx=2)
         self.combo_unidad = ttk.Combobox(ing_frame, values=["pz", "g", "kg", "ml", "l", "cda", "cdta"], 
-                                       font=("Arial", 8), state="readonly")
+                           font=("Arial", 8), state="readonly")
         self.combo_unidad.set("pz")
-        self.combo_unidad.grid(row=0, column=2, sticky="ew", padx=(2, 0))
+        self.combo_unidad.grid(row=1, column=2, sticky="ew", padx=(2, 0))
+        row += 1
         
         # Botones de ingredientes compactos
         btn_ing_frame = tk.Frame(form_frame, bg=BG_COLOR)
@@ -317,6 +319,16 @@ class RecipeGUI:
     
     def cargar_receta_para_editar(self):
         """Carga la receta seleccionada en el formulario para editarlo"""
+        self.entry_nombre.config(state="normal")
+        self.entry_descripcion.config(state="normal")
+        self.entry_instrucciones.config(state="normal")
+        self.listbox_ingredientes.config(state="normal")
+        self.btn_agregar_ingrediente.config(state="normal")
+        self.btn_eliminar_ingrediente.config(state="normal")
+        self.btn_guardar.config(state="normal")
+        self.btn_limpiar.config(state="normal")
+        self.btn_agregar.config(state="disabled")
+
         selected = self.tree.selection()
         if not selected:
             self.show_error("Selecciona una receta para editar")
