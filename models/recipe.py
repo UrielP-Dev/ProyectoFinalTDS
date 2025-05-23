@@ -14,6 +14,14 @@ class Recipe:
         self.description = description
         self.ingredients = ingredients
         self.steps = steps
+    
+    def __str__(self):
+        """Representación en string del objeto Recipe"""
+        return self.name
+    
+    def __repr__(self):
+        """Representación en string para depuración"""
+        return f"Recipe(name='{self.name}', id={self.recipe_id})"
         
     def to_dict(self):
         """Convierte el objeto a un diccionario"""
